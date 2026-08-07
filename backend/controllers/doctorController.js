@@ -62,9 +62,55 @@ exports.updateAppointment = async (req, res) => {
       { _id: req.params.id, doctor: req.user._id },
       { status: req.body.status, notes: req.body.notes },
       { new: true }
-    ).populate("patient", "name age gender phone");
+    ).populate("patient", "name email age gender phone"); // Ensure patient email is populated
 
     if (!appt) return res.status(404).json({ message: "Appointment not found" });
+
+    // Send Confirmation Email if the status is updated to "confirmed"
+    if (req.body.status === "confirmed") {
+      const doctor = req.user; 
+      
+      // Generates "sw" + the last 3 characters of the unique appointment ID
+      const videoRoomId = `sw${appt._id.toString().slice(-3)}`; 
+      
+      // Format the date to be more readable (e.g., "Monday, August 7, 2026")
+      const formattedDate = new Date(appt.date).toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      const subject = `Appointment Confirmed: Dr. ${doctor.name} - SwasthSetu`;
+      
+      // The Improved Email Template
+      const message = `Dear ${appt.patient.name},
+
+We are pleased to inform you that your appointment has been successfully confirmed!
+
+📅 Appointment Details:
+--------------------------------------
+Doctor: Dr. ${doctor.name}
+Specialization: ${doctor.specialization || "General Physician"}
+Date: ${formattedDate}
+Time: ${appt.time}
+Type: ${appt.type === 'video' ? 'Video Consultation 📹' : 'In-Person Visit 🏥'}
+
+${appt.type === 'video' ? `🔗 Video Consultation Instructions:
+--------------------------------------
+Your Secure Video Room ID is: ${videoRoomId}
+
+Please log in to your SwasthSetu Patient Portal 5 minutes before your scheduled time. Navigate to "Treat Disease" -> "Video Consultation", and enter your Room ID to join the call.` : `📍 Clinic Instructions:
+--------------------------------------
+Please arrive at the clinic 10 minutes before your scheduled appointment time.`}
+
+If you need to cancel or reschedule, please do so via your Patient Dashboard.
+
+Wishing you good health,
+The SwasthSetu Team
+support@swasthsetu.app`;
+
+      // Send the email
+      await sendEmail(appt.patient.email, subject, message);
+    }
+
     res.json(appt);
   } catch (err) {
     res.status(500).json({ message: err.message });

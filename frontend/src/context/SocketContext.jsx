@@ -40,6 +40,6 @@ export function SocketProvider({ children }) {
       {children}
     </SocketContext.Provider>
   );
-}
+} 
 
 export const useSocket = () => useContext(SocketContext);

@@ -1,16 +1,16 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Auth & Public Pages
 import Landing from "./pages/auth/Landing";
-import Login from "./pages/auth/Loing";
+import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import RoomPage from "./pages/room/index";
 
 // Layouts
 import PatientLayout from "./layouts/PatientLayout";
 import DoctorLayout from "./layouts/DoctorLayout";
 import AdminLayout from "./layouts/AdminLayout";
-
-// Protected Route Component
-import ProtectedRoute from "./components/ProtectedRoute";
 
 // Patient Pages
 import PatientDashboard from "./pages/patient/Dashboard";
@@ -20,6 +20,7 @@ import TreatDisease from "./pages/patient/TreatDisease";
 import PatientRecords from "./pages/patient/Records";
 import PatientProfile from "./pages/patient/Profile";
 import PatientSettings from "./pages/patient/Setting";
+import Notifications from "./pages/patient/Notifications";
 
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/Dashboard";
@@ -38,9 +39,6 @@ import AdminAppointments from "./pages/admin/Appointments";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Setting";
 
-// Video Room Page
-import RoomPage from "./pages/room/index";
-
 export default function App() {
   return (
     <Routes>
@@ -50,15 +48,8 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/room/:roomId" element={<RoomPage />} />
 
-      {/* Patient Dashboard Routes */}
-      <Route
-        path="/patient"
-        element={
-          <ProtectedRoute roles={["patient"]}>
-            <PatientLayout />
-          </ProtectedRoute>
-        }
-      >
+      {/* Patient Routes */}
+      <Route path="/patient" element={<ProtectedRoute roles={["patient"]}><PatientLayout /></ProtectedRoute>}>
         <Route index element={<PatientDashboard />} />
         <Route path="maintain-health" element={<MaintainHealth />} />
         <Route path="prevent-disease" element={<PreventDisease />} />
@@ -66,17 +57,11 @@ export default function App() {
         <Route path="records" element={<PatientRecords />} />
         <Route path="profile" element={<PatientProfile />} />
         <Route path="settings" element={<PatientSettings />} />
+        <Route path="notifications" element={<Notifications />} />
       </Route>
 
-      {/* Doctor Dashboard Routes */}
-      <Route
-        path="/doctor"
-        element={
-          <ProtectedRoute roles={["doctor"]}>
-            <DoctorLayout />
-          </ProtectedRoute>
-        }
-      >
+      {/* Doctor Routes */}
+      <Route path="/doctor" element={<ProtectedRoute roles={["doctor"]}><DoctorLayout /></ProtectedRoute>}>
         <Route index element={<DoctorDashboard />} />
         <Route path="appointments" element={<DoctorAppointments />} />
         <Route path="consultation" element={<DoctorConsultation />} />
@@ -86,15 +71,8 @@ export default function App() {
         <Route path="profile" element={<DoctorProfile />} />
       </Route>
 
-      {/* Admin Dashboard Routes */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute roles={["admin"]}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
+      {/* Admin Routes */}
+      <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="doctors" element={<AdminDoctors />} />
@@ -102,9 +80,6 @@ export default function App() {
         <Route path="reports" element={<AdminReports />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
