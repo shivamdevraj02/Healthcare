@@ -4,36 +4,41 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: ["patient", "doctor", "admin"], default: "patient" },
-    phone: { type: String, default: "" },
-age: { type: Number, default: null },
-gender: { type: String, enum: ["male", "female", "other"], default: "other" },
-    avatar: { type: String, default: "" },
-
-    // Doctor-specific fields
-    specialization: { type: String, default: "" },
-    qualification: { type: String, default: "" },
-    experienceYears: { type: Number, default: 0 },
-    availability: [
-      {
-        day: { type: String },
-        slots: [{ type: String }],
-      },
-    ],
-
-    // Patient-specific quick fields
-    bloodGroup: { type: String, default: "" },
-    healthScore: { type: Number, default: 70 },
-    isActive: { type: Boolean, default: true },
-
-    // NEW: Handles the Doctor Approval Workflow
-    approvalStatus: {
+    name: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "approved"
+      required: [true, "Name is required"],
+      trim: true,
+      minlength: [2, "Name must be at least 2 characters"],
+      maxlength: [50, "Name cannot exceed 50 characters"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email address is required"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        "Please provide a valid email address",
+      ],
+    },
+    phone: {
+      type: String,
+      trim: true,
+      match: [
+        /^[6-9]\d{9}$/,
+        "Please provide a valid 10-digit mobile number",
+      ],
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters"],
+    },
+    role: {
+      type: String,
+      enum: ["patient", "doctor", "admin"],
+      default: "patient",
     },
   },
   { timestamps: true }

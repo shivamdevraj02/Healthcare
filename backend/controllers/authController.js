@@ -11,62 +11,41 @@ const genToken = (id) => {
 // POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, phone, specialization, qualification } = req.body;
+    let { name, email, password, role, phone, specialization } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email and password are required" });
+    // Clean inputs
+    email = email?.toLowerCase().trim();
+    phone = phone?.trim();
+
+    // 1. Check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "An account with this email already exists." });
     }
 
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ message: "Email already registered" });
-
-    const assignedRole = ["patient", "doctor", "admin"].includes(role) ? role : "patient";
-    const approvalStatus = assignedRole === "doctor" ? "pending" : "approved";
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role: assignedRole,
-      phone,
-      specialization,
-      qualification,
-      approvalStatus,
-    });
-
-    if (assignedRole === "doctor") {
-      const admin = await User.findOne({ role: "admin" }).select("_id");
-      if (admin) {
-        await createNotification(
-          admin._id,
-          "New doctor registration",
-          `${user.name} has registered as a doctor and is waiting for your approval.`,
-          "info"
-        );
-      }
-
-      await createNotification(
-        user._id,
-        "Pending approval",
-        "Your doctor account is pending admin approval. You will be able to sign in once approved.",
-        "info"
-      );
-
-
-      return res.status(201).json({
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
-        message: "Doctor account created. Please wait for admin approval before logging in.",
+    // 2. Validate Password Rules
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password is too weak. Must contain at least 8 characters, 1 uppercase letter, 1 number, and 1 special symbol.",
       });
     }
 
-    const token = genToken(user._id);
-
-    res.status(201).json({
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    // 3. Hash password & Save
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: role || "patient",
+      phone,
+      specialization: role === "doctor" ? specialization : undefined,
     });
+
+    res.status(201).json({ message: "Registration successful!", user: { id: user._id, name: user.name, role: user.role } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message || "Server Error" });
   }
 };
 

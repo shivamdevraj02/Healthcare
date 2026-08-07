@@ -10,28 +10,27 @@ export function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const token = localStorage.getItem("ss_token");
-  if (!token) {
-    setLoading(false);
-    return;
-  }
-  
-  api
-    .get("/auth/me")
-    .then((res) => {
-      if (res.data?.user) {
-        setUser(res.data.user);
-        localStorage.setItem("ss_user", JSON.stringify(res.data.user));
-      }
-    })
-    .catch(() => {
-      localStorage.removeItem("ss_token");
-      localStorage.removeItem("ss_user");
-      setUser(null);
-    })
-    .finally(() => setLoading(false));
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("ss_token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    api
+      .get("/auth/me")
+      .then((res) => {
+        if (res.data?.user) {
+          setUser(res.data.user);
+          localStorage.setItem("ss_user", JSON.stringify(res.data.user));
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem("ss_token");
+        localStorage.removeItem("ss_user");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
@@ -46,10 +45,11 @@ useEffect(() => {
     return res.data;
   };
 
-  const logout = () => {
+  const logout = (callback) => {
     localStorage.removeItem("ss_token");
     localStorage.removeItem("ss_user");
     setUser(null);
+    if (callback) callback();
   };
 
   return (
@@ -57,6 +57,6 @@ useEffect(() => {
       {children}
     </AuthContext.Provider>
   );
-} 
+}
 
 export const useAuth = () => useContext(AuthContext);
