@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../services/api";
+import chatbotIcon from "../../chat-bot.png";
+import languageIcon from "../../languageimages.png";
 
 // Floating voice + text assistant widget.
 // Uses the browser's native Web Speech API (SpeechRecognition + SpeechSynthesis) —
@@ -24,11 +26,25 @@ export default function VoiceAssistant() {
   const scrollRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   // Mirrors `open` for use inside async callbacks (state is stale in closures)
   const openRef = useRef(open);
   useEffect(() => {
     openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        closeAssistant();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
   // Speech recognition (voice input) setup
@@ -209,39 +225,51 @@ export default function VoiceAssistant() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 font-sans">
+    <div className="fixed bottom-5 right-5 z-50 font-sans" ref={wrapperRef}>
       {open && (
-        <div className="mb-3 w-80 max-w-[90vw] h-[28rem] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+        <div className="mb-3 w-96 max-w-[90vw] h-[34rem] bg-white rounded-[32px] shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="bg-brand-600 text-white px-4 py-3 flex items-center justify-between relative">
-            <div>
-              <p className="font-semibold text-sm">SwasthSetu Assistant</p>
-              <p className="text-xs text-brand-100">{listening ? "Listening..." : "Ask by voice or text"}</p>
+          <div className="bg-brand-700 text-white px-5 py-4 flex items-center justify-between gap-4 relative">
+            <div className="flex items-center gap-3">
+              <img src={chatbotIcon} alt="Chatbot icon" className="w-9 h-9 rounded-2xl bg-white/10 p-1" />
+              <div>
+                <p className="font-semibold text-sm uppercase tracking-[0.2em] text-brand-100/90">SwasthSetu Assistant</p>
+                <p className="text-xs text-brand-100/75 mt-1">{listening ? "Listening..." : "Ask by voice or text"}</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button
                 title="Change voice"
                 onClick={() => setShowVoicePicker((v) => !v)}
-                className="text-white/80 hover:text-white text-sm"
+                className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 text-white/90 hover:bg-white/15 transition-flex items-center justify-center flex"
               >
-                🗣️
+                <img src={languageIcon} alt="Language" className="w-5 h-5" />
               </button>
               <button
                 title={voiceReplyEnabled ? "Voice replies on" : "Voice replies off"}
                 onClick={() => setVoiceReplyEnabled((v) => !v)}
-                className="text-white/80 hover:text-white text-sm"
+                className={`w-10 h-10 rounded-2xl text-white/90 border border-white/15 ${voiceReplyEnabled ? "bg-white/10" : "bg-white/12"} hover:bg-white/15 transition-flex flex items-center justify-center`}
               >
                 {voiceReplyEnabled ? "🔊" : "🔇"}
               </button>
-              <button onClick={closeAssistant} className="text-white/80 hover:text-white text-sm">✕</button>
+              <button
+                title="Close assistant"
+                onClick={closeAssistant}
+                className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 text-white/90 hover:bg-white/15 transition-flex flex items-center justify-center"
+              >
+                ✕
+              </button>
             </div>
 
             {showVoicePicker && (
-              <div className="absolute top-full right-2 mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-10">
-                <p className="text-xs text-slate-500 px-1 pb-1">Choose reply voice</p>
+              <div className="absolute top-full right-4 mt-2 w-64 bg-white border border-slate-200 rounded-[24px] shadow-2xl p-3 z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <img src={languageIcon} alt="Language icon" className="w-4 h-4" />
+                  <p className="text-xs text-slate-500">Choose reply voice</p>
+                </div>
                 {voices.length ? (
                   <select
-                    className="w-full text-sm border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 outline-none"
+                    className="w-full text-sm border border-slate-200 rounded-2xl px-3 py-2 text-slate-700 outline-none"
                     value={selectedVoiceURI}
                     onChange={(e) => handleVoiceChange(e.target.value)}
                   >
@@ -263,11 +291,10 @@ export default function VoiceAssistant() {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`max-w-[85%] text-sm px-3 py-2 rounded-xl ${
-                  m.from === "user"
-                    ? "bg-brand-500 text-white ml-auto rounded-br-sm"
-                    : "bg-white border border-slate-200 text-slate-700 rounded-bl-sm"
-                }`}
+                className={`max-w-[85%] text-sm px-3 py-2 rounded-xl ${m.from === "user"
+                  ? "bg-brand-500 text-white ml-auto rounded-br-sm"
+                  : "bg-white border border-slate-200 text-slate-700 rounded-bl-sm"
+                  }`}
               >
                 {m.text}
               </div>
@@ -290,9 +317,8 @@ export default function VoiceAssistant() {
               <button
                 type="button"
                 onClick={toggleListening}
-                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm shrink-0 ${
-                  listening ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-600"
-                }`}
+                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm shrink-0 ${listening ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-600"
+                  }`}
                 title="Tap to speak"
               >
                 🎙️
@@ -315,13 +341,15 @@ export default function VoiceAssistant() {
       )}
 
       {/* Floating toggle button */}
-      <button
-        onClick={() => (open ? closeAssistant() : setOpen(true))}
-        className="w-14 h-14 rounded-full bg-brand-500 hover:bg-brand-600 text-white shadow-xl flex items-center justify-center text-2xl transition-transform hover:scale-105"
-        aria-label="Open voice assistant"
-      >
-        {open ? "✕" : "🎙️"}
-      </button>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="relative w-18 h-18 min-w-[4.5rem] min-h-[4.5rem] rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-[0_24px_80px_rgba(15,86,105,0.25)] flex items-center justify-center transition-transform hover:scale-105"
+          aria-label="Open voice assistant"
+        >
+          <img src={chatbotIcon} alt="Open chat" className="w-10 h-10" />
+        </button>
+      )}
     </div>
   );
 }

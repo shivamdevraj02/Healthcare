@@ -32,12 +32,11 @@ exports.register = async (req, res) => {
       });
     }
 
-    // 3. Hash password & Save
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 3. Save user (password will be hashed in User model pre-save hook)
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       role: role || "patient",
       phone,
       specialization: role === "doctor" ? specialization : undefined,
@@ -45,6 +44,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ message: "Registration successful!", user: { id: user._id, name: user.name, role: user.role } });
   } catch (err) {
+    console.error("Auth register error:", err);
     res.status(500).json({ message: err.message || "Server Error" });
   }
 };

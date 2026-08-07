@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema(
       enum: ["patient", "doctor", "admin"],
       default: "patient",
     },
+    isActive: { type: Boolean, default: true },
+    approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
   },
   { timestamps: true }
 );
