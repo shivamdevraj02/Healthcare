@@ -47,15 +47,18 @@ exports.getDashboard = async (req, res) => {
 
 // ---- Maintain Health ----
 // POST /api/patient/health-record
+// POST /api/patient/health-record
 exports.addHealthRecord = async (req, res) => {
   try {
     const { type, data } = req.body;
+
     if (!["water", "sleep", "bmi", "diet", "activity"].includes(type)) {
       return res.status(400).json({ message: "Invalid record type" });
     }
 
     let finalData = data;
 
+    // Comprehensive AI Monthly Diet Planner Logic
     if (type === "diet") {
       const {
         goal = "maintain",
@@ -71,7 +74,7 @@ exports.addHealthRecord = async (req, res) => {
       const userAge = req.user?.age || 25;
       const userGender = req.user?.gender || "unspecified";
 
-      const prompt = `You are an expert clinical nutritionist. Generate a comprehensive MONTHLY DIET PLAN for a patient with:
+      const prompt = `You are an expert clinical nutritionist. Generate an IN-DEPTH, DETAILED MONTHLY DIET PLAN for a patient with:
       - Age: ${userAge}, Gender: ${userGender}
       - Current Weight: ${currentWeight || "Not specified"} kg, Height: ${height || "Not specified"} cm
       - Goal: ${goal} weight (Target: ${targetWeight || "N/A"} kg)
@@ -82,35 +85,45 @@ exports.addHealthRecord = async (req, res) => {
 
       Return STRICTLY a valid JSON object matching this schema:
       {
-        "dailyCalorieTarget": "2000 kcal",
+        "dailyCalorieTarget": "e.g., 2100 kcal",
         "macroSplit": { "carbs": "45%", "protein": "30%", "fats": "25%" },
-        "hydrationGoal": "3.0 Liters/day",
-        "monthlyOverview": "Gradual metabolic reset and balanced macronutrient intake across 4 weeks.",
+        "hydrationGoal": "e.g., 3.0 Liters/day",
+        "monthlyOverview": "Comprehensive strategy covering metabolic adaptation and sustainable habit building across 4 weeks.",
         "weeklyPhases": [
-          { "week": 1, "focus": "Detox & Adaptation", "description": "Reduce refined sugars and increase fiber" },
-          { "week": 2, "focus": "Protein Optimization", "description": "Build lean muscle mass recovery" },
-          { "week": 3, "focus": "Metabolic Boost", "description": "Adjust caloric timing around activity" },
-          { "week": 4, "focus": "Sustainable Maintenance", "description": "Establish long-term daily habits" }
+          { "week": 1, "focus": "Detox & Baseline Adaptation", "description": "Eliminate processed foods, optimize hydration, and introduce clean protein sources." },
+          { "week": 2, "focus": "Macronutrient Balance", "description": "Adjust carb-to-protein ratio according to daily activity levels." },
+          { "week": 3, "focus": "Metabolic Boost", "description": "Incorporate nutrient-dense whole foods and strategic meal timing." },
+          { "week": 4, "focus": "Long-Term Habit Maintenance", "description": "Solidify portion control and sustainable daily meal schedules." }
         ],
         "dailyMealPlanTemplate": {
-          "earlyMorning": "Warm lemon water + 5 soaked almonds",
-          "breakfast": "Oats porridge with chia seeds & sprouts",
-          "midMorningSnack": "1 bowl of seasonal fresh fruit",
-          "lunch": "Brown rice/Roti, Dal, Paneer/Tofu, Salad",
-          "eveningSnack": "Roasted makhana + Green tea",
-          "dinner": "Soup + Grilled veggies with protein source"
+          "earlyMorning": "Warm lemon water with 5 soaked almonds & chia seeds",
+          "breakfast": "High-protein oats porridge or paneer/egg bhurji with whole grain toast",
+          "midMorningSnack": "1 cup of fresh seasonal fruit with flaxseeds",
+          "lunch": "Balanced bowl of Brown Rice/Roti, Dal, Tofu/Paneer/Chicken curry, and fresh green salad",
+          "eveningSnack": "Green tea with roasted makhana or boiled chana",
+          "dinner": "Light vegetable soup with grilled protein and steamed greens before 8 PM"
         },
         "doAndDonts": {
-          "dos": ["Drink 500ml water before meals", "Sleep 7-8 hours daily"],
-          "donts": ["Avoid sugar after 6 PM", "Avoid fried snacks"]
+          "dos": [
+            "Drink 500ml water 30 minutes before major meals",
+            "Maintain a consistent 7-8 hour sleep schedule",
+            "Prioritize whole grains over refined carbohydrates"
+          ],
+          "donts": [
+            "Avoid consuming sugary drinks or heavy snacks after 7:30 PM",
+            "Do not skip meals or crash diet",
+            "Avoid ultra-processed foods and hidden sodium"
+          ]
         }
-      }`;
+      }
+      
+      Do not include markdown codeblocks, commentary, or extra text. Output ONLY raw JSON.`;
 
       let planDetails = null;
 
       try {
         const response = await aiDiet.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-2.5-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -121,28 +134,29 @@ exports.addHealthRecord = async (req, res) => {
         planDetails = JSON.parse(rawText);
       } catch (aiErr) {
         console.error("AI Diet Generation Error:", aiErr);
+        // Robust Fallback if API Key fails or Gemini times out
         planDetails = {
           dailyCalorieTarget: "2000 kcal",
-          macroSplit: { carbs: "50%", protein: "25%", fats: "25%" },
-          hydrationGoal: "2.5 - 3.0 Liters",
-          monthlyOverview: "Balanced calorie deficit/surplus roadmap.",
+          macroSplit: { carbs: "45%", protein: "30%", fats: "25%" },
+          hydrationGoal: "3.0 Liters/day",
+          monthlyOverview: "Balanced calorie deficit/surplus roadmap with macro distribution.",
           weeklyPhases: [
-            { week: 1, focus: "Adaptation", description: "Clean eating baseline" },
-            { week: 2, focus: "Macro balance", description: "Increase protein intake" },
-            { week: 3, focus: "Consistency", description: "Energy stabilization" },
-            { week: 4, focus: "Maintenance", description: "Long-term sustainability" },
+            { week: 1, focus: "Adaptation Phase", description: "Clean eating baseline and sugar reduction." },
+            { week: 2, focus: "Protein Optimization", description: "Increase lean protein and fiber intake." },
+            { week: 3, focus: "Energy Stabilization", description: "Strategic caloric timing around activity." },
+            { week: 4, focus: "Maintenance Routine", description: "Sustain daily meal habits." },
           ],
           dailyMealPlanTemplate: {
-            earlyMorning: "Warm water + soaked almonds",
-            breakfast: "High-protein oats or eggs",
-            midMorningSnack: "Fresh seasonal fruit",
-            lunch: "Balanced dal, rice/chapati, and salad",
-            eveningSnack: "Green tea + roasted chana",
-            dinner: "Light protein-rich meal with veggies",
+            earlyMorning: "Warm lemon water + soaked almonds",
+            breakfast: "Oats with protein & chia seeds or eggs/paneer",
+            midMorningSnack: "Fresh seasonal fruit bowl",
+            lunch: "Balanced dal, brown rice/chapati, paneer/tofu/chicken, and salad",
+            eveningSnack: "Green tea with roasted chana or makhana",
+            dinner: "Light protein-rich soup with steamed vegetables",
           },
           doAndDonts: {
-            dos: ["Eat slowly", "Stay hydrated"],
-            donts: ["Skip meals", "Consume late night snacks"],
+            dos: ["Eat mindfully and chew slowly", "Drink 2.5-3L water daily"],
+            donts: ["Skip breakfast", "Consume refined sugars after dinner"],
           },
         };
       }
