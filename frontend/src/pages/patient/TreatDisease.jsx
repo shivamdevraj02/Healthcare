@@ -333,27 +333,31 @@ function VideoConsultation() {
   };
 
   return (
-    <Card title="Start Telehealth Consultation">
-      <p className="text-xs text-slate-500 mb-4">
-        Logged in as: <span className="font-semibold text-slate-800">{user?.email}</span>
-      </p>
-      <form onSubmit={joinRoom} className="space-y-3 max-w-md">
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Consultation Room ID</label>
-          <input
-            type="text"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-            placeholder="Enter Room Code provided by Doctor"
-            className="input text-xs"
-          />
+    <div className="max-w-lg mx-auto  pt-6">
+      <Card title="Start Telehealth Consultation">
+        <div className="py-2">
+          <p className="text-sm text-slate-500 mb-6">
+            Logged in as: <span className="font-semibold text-slate-800">{user?.email}</span>
+          </p>
+          <form onSubmit={joinRoom} className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Consultation Room ID</label>
+              <input
+                type="text"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+                placeholder="Enter Room Code provided by Doctor"
+                className="input text-sm py-3"
+              />
+            </div>
+            <button type="submit" className="btn-primary text-sm font-bold py-3.5 w-full">
+              Join Video Room
+            </button>
+            {message && <p className="text-sm text-amber-600">{message}</p>}
+          </form>
         </div>
-        <button type="submit" className="btn-primary text-xs font-bold py-2.5 w-full">
-          Join Video Room
-        </button>
-        {message && <p className="text-xs text-amber-600">{message}</p>}
-      </form>
-    </Card>
+      </Card>
+    </div>
   );
 }
 
