@@ -1,12 +1,12 @@
-// import { useEffect, useState, useRef } from "react";
-// import api from "../../services/api";
-// import Card from "../../components/Card";
-// import { Activity, Utensils, Download } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import api from "../../services/api";
+import Card from "../../components/Card";
+import { Activity, Utensils, Download } from "lucide-react";
 
-// const TABS = ["BMI Calculator", "Diet Planner"];
+const TABS = ["BMI Calculator", "Diet Planner"];
 
 export default function MaintainHealth() {
-  // const [tab, setTab] = useState(TABS[0]);
+  const [tab, setTab] = useState(TABS[0]);
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-10">
