@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@zegocloud/zego-uikit-prebuilt": "^2.18.1",
+    "axios": "^1.19.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.30.0",
