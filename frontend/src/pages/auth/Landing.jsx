@@ -55,26 +55,30 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <span className="inline-block bg-accent-50 text-accent-600 text-xs font-medium px-3 py-1 rounded-full mb-4">
+        <span className="inline-block bg-accent-50 text-accent-600 text-xs font-medium px-3 py-1 rounded-full mb-6">
           Trusted by patients and doctors
         </span>
 
-        <h1 className="text-4xl sm:text-5xl font-bold text-ink leading-tight">
-          Healthcare made simple with{" "}
-          <span className="text-brand-600">SwasthSetu</span>
-        </h1>
-        <p className="text-slate-600 text-lg mt-4 max-w-2xl mx-auto">
-          A bridge connecting patients and doctors — book appointments,
-          consult, and manage your health records, all in one place.
-        </p>
+        <div className="rounded-2xl overflow-hidden shadow-2xl">
+          <div className="bg-gradient-to-r from-brand-600 to-accent-500 text-white px-8 py-16 sm:py-20">
+            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+              Welcome to
+              <span className="block text-5xl sm:text-6xl mt-2">SwasthSetu</span>
+            </h1>
+            <p className="text-white/90 text-lg mt-4 max-w-2xl mx-auto">
+              A bridge connecting patients and doctors — book appointments,
+              consult, and manage your health records, all in one place.
+            </p>
 
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <Link to="/register" className="btn-primary px-6 py-3 text-base">
-            Get started
-          </Link>
-          <Link to="/login" className="btn-outline px-6 py-3 text-base">
-            I already have an account
-          </Link>
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <Link to="/register" className="inline-flex items-center gap-2 bg-white text-brand-600 px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition">
+                Get started
+              </Link>
+              <Link to="/login" className="inline-flex items-center gap-2 border border-white/30 text-white px-6 py-3 rounded-lg font-medium hover:bg-white/5 transition">
+                I already have an account
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
