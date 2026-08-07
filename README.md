@@ -19,13 +19,6 @@ A Complete Healthcare Management Platform for Patients, Doctors & Administrators
 
 </p>
 
----
-
-# 🌐 Live Demo
-
-🚀 Frontend: **Coming Soon**
-
-🖥 Backend API: **Coming Soon**
 
 ---
 
