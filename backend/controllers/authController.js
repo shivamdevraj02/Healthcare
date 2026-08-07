@@ -52,6 +52,7 @@ exports.register = async (req, res) => {
         "info"
       );
 
+
       return res.status(201).json({
         user: { id: user._id, name: user.name, email: user.email, role: user.role },
         message: "Doctor account created. Please wait for admin approval before logging in.",
@@ -65,7 +66,6 @@ exports.register = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error("Auth register error:", err);
     res.status(500).json({ message: err.message });
   }
 };

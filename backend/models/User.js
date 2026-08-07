@@ -9,8 +9,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6 },
     role: { type: String, enum: ["patient", "doctor", "admin"], default: "patient" },
     phone: { type: String, default: "" },
-    age: { type: Number },
-    gender: { type: String, enum: ["male", "female", "other"], default: "other" },
+age: { type: Number, default: null },
+gender: { type: String, enum: ["male", "female", "other"], default: "other" },
     avatar: { type: String, default: "" },
 
     // Doctor-specific fields
