@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Add useLocation
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 // ... (keep all your existing SVG Icons here) ...
 const HeartPulseIcon = ({ size = 20 }) => (
@@ -29,7 +29,7 @@ const SpinnerIcon = ({ size = 16 }) => (
 );
 
 export default function Login() {
-  // const { login } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,31 +40,20 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setSuccessMsg("");
-  //   setLoading(true);
-  //   try {
-  //     const user = await login(form.email, form.password);
-  //     navigate(`/${user.role}`);
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Login failed");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-
-  // Fake a 1-second loading delay for the UI, then navigate
-  setTimeout(() => {
-    setLoading(false);
-    navigate("/patient"); // Hardcoded to patient dashboard for now
-  }, 1000);
-};
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+    try {
+      const user = await login(form.email, form.password);
+      navigate(`/${user.role}`);
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-brand-50 flex flex-col">

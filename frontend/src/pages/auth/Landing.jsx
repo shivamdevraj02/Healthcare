@@ -27,9 +27,9 @@ const MapPinIcon = ({ size = 14 }) => (
   </svg>
 );
 
-const Landing = () => {
+export default function Landing() {
   return (
-     <div className="min-h-screen bg-brand-50 flex flex-col">
+    <div className="min-h-screen bg-brand-50 flex flex-col">
       {/* Navbar */}
       <nav className="w-full border-b border-accent-100 bg-accent-50/90 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -175,6 +175,4 @@ const Landing = () => {
       </footer>
     </div>
   );
-};
-
-export default Landing;
+}

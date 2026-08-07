@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const HeartPulseIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -75,7 +75,7 @@ const SpinnerIcon = ({ size = 16 }) => (
 );
 
 export default function Register() {
-  // const { register } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -89,41 +89,25 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setLoading(true);
-  //   try {
-  //     const response = await register(form);
-  //     const successMsg = form.role === "doctor"
-  //       ? response.message || "Doctor account created! Please wait for admin approval before logging in."
-  //       : "Account created successfully! Please login.";
-
-  //     navigate("/login", {
-  //       state: { message: successMsg },
-  //     });
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Registration failed");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const response = await register(form);
+      const successMsg = form.role === "doctor"
+        ? response.message || "Doctor account created! Please wait for admin approval before logging in."
+        : "Account created successfully! Please login.";
 
-  setTimeout(() => {
-    setLoading(false);
-    const successMsg = form.role === "doctor"
-      ? "Doctor account created! Please wait for admin approval before logging in."
-      : "Account created successfully! Please login.";
-
-    navigate("/login", {
-      state: { message: successMsg },
-    });
-  }, 1000);
-};
+      navigate("/login", {
+        state: { message: successMsg },
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-brand-50 flex flex-col">
