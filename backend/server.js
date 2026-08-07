@@ -69,6 +69,9 @@ app.use("/api/appointments", require("./routes/appointmentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/chatbot", require("./routes/chatbotRoutes"));
 
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/api/payments", paymentRoutes);
+
 app.use((req, res) => res.status(404).json({ message: "Route not found" }));
 
 app.use((err, req, res, next) => {

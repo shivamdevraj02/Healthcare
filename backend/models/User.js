@@ -4,44 +4,40 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxlength: [50, "Name cannot exceed 50 characters"],
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ["patient", "doctor", "admin"], required: true },
+    phone: { type: String },
+    
+    // Doctor Specific Fields
+    specialization: { type: String },
+    qualification: { type: String },
+    experienceYears: { type: Number, default: 0 },
+    consultationFee: { 
+      type: Number, 
+      default: 500 // Admin-controlled standard fee for consultations
     },
-    email: {
-      type: String,
-      required: [true, "Email address is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        "Please provide a valid email address",
-      ],
+    approvalStatus: { 
+      type: String, 
+      enum: ["pending", "approved", "rejected"], 
+      default: function() {
+        return this.role === "doctor" ? "pending" : "approved";
+      } 
     },
-    phone: {
-      type: String,
-      trim: true,
-      match: [
-        /^[6-9]\d{9}$/,
-        "Please provide a valid 10-digit mobile number",
-      ],
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: [8, "Password must be at least 8 characters"],
-    },
-    role: {
-      type: String,
-      enum: ["patient", "doctor", "admin"],
-      default: "patient",
-    },
+    availability: [
+      {
+        day: { type: String },
+        slots: [{ type: String }],
+      },
+    ],
+
+    // Patient Specific Fields
+    age: { type: Number },
+    gender: { type: String, enum: ["male", "female", "other"] },
+    bloodGroup: { type: String },
+
     isActive: { type: Boolean, default: true },
-    approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
   },
   { timestamps: true }
 );

@@ -37,33 +37,29 @@ exports.getUsers = async (req, res) => {
 // PUT /api/admin/users/:id  (activate/deactivate, edit role)
 exports.updateUser = async (req, res) => {
   try {
-    const allowed = ["isActive", "role", "name", "phone", "approvalStatus"];
+    const allowed = ["isActive", "role", "name", "phone", "approvalStatus", "consultationFee"];
     const updates = {};
     allowed.forEach((k) => {
       if (req.body[k] !== undefined) updates[k] = req.body[k];
     });
-
     if (updates.approvalStatus && !["pending", "approved", "rejected"].includes(updates.approvalStatus)) {
       delete updates.approvalStatus;
     }
-
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
-
+    
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select("-password");
-
+    
     if (updatedUser?.role === "doctor" && updates.approvalStatus) {
       const notificationMessage = {
         approved: "Your doctor account has been approved. You can now log in.",
         rejected: "Your doctor account was rejected by the admin.",
         pending: "Your doctor account has been moved back to pending review.",
       }[updates.approvalStatus];
-
       if (notificationMessage) {
         await createNotification(updatedUser._id, "Approval update", notificationMessage, "info");
       }
     }
-
     res.json(updatedUser);
   } catch (err) {
     res.status(500).json({ message: err.message });

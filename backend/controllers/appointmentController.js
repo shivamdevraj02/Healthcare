@@ -3,17 +3,22 @@ const Notification = require("../models/Notification");
 const User = require("../models/User");
 
 // POST /api/appointments (Patient books an appointment)
+// POST /api/appointments (Patient books an appointment)
 exports.bookAppointment = async (req, res) => {
   try {
-    const { doctor, date, time, type, reason } = req.body;
-
+    const { doctor, date, time, type, reason, fee } = req.body;
     if (!doctor || !date || !time) {
       return res
         .status(400)
         .json({ message: "doctor, date and time are required" });
     }
 
-    // 1. Create Appointment Record
+    // 1. Calculate 3-way split or use provided fee
+    const consultationFee = fee || 500;
+    const adminCommission = Math.round(consultationFee * 0.05 * 100) / 100; // 5% Admin cut
+    const doctorEarnings = consultationFee - adminCommission;
+
+    // 2. Create Appointment Record with Financial fields
     const appointment = await Appointment.create({
       patient: req.user._id,
       doctor,
@@ -21,15 +26,18 @@ exports.bookAppointment = async (req, res) => {
       time,
       type: type || "video",
       reason: reason || "",
+      fee: consultationFee,
+      adminCommission,
+      doctorEarnings,
+      paymentStatus: "pending",
     });
 
-    // Populate patient details taaki doctor side UI me name, age, phone instant render ho sake
-    await appointment.populate("patient doctor", "name email phone age gender");
+    // Populate patient & doctor details
+    await appointment.populate("patient doctor", "name email phone age gender specialization");
 
-    // 2. Safely Trigger Notification & Socket Emit for Doctor
+    // 3. Trigger Notification & Socket Emit for Doctor
     try {
       if (doctor) {
-        // Database notification create karein
         const newNotif = await Notification.create({
           user: doctor,
           title: "New Appointment Request",
@@ -37,22 +45,17 @@ exports.bookAppointment = async (req, res) => {
           type: "appointment",
         });
 
-        // Socket Instance retrieve karein (server.js me app.set("io", io) zaroori hai)
         const io = req.app.get("io");
         if (io) {
-          // A) Doctor ko live New Appointment Request ka data bhejen
           io.to(doctor.toString()).emit("appointment_updated", {
             type: "NEW_APPOINTMENT",
             appointment,
           });
-
-          // B) Doctor ke Topbar par live Notification pop karayein
           io.to(doctor.toString()).emit("new_notification", newNotif);
         }
       }
     } catch (notifErr) {
       console.error("Non-blocking Notification/Socket Error:", notifErr.message);
-      // Main appointment creation will still succeed even if notification/socket fails
     }
 
     return res.status(201).json(appointment);
