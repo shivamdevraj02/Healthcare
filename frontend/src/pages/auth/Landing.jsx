@@ -35,7 +35,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center group-hover:bg-brand-600 transition-colors">
-              {/* <HeartPulseIcon size={20} /> */}
+              <HeartPulseIcon size={20} />
             </span>
             <span className="text-xl font-bold text-brand-600">
               SwasthSetu
