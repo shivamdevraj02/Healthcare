@@ -12,9 +12,7 @@ import {
   PlusCircle, 
   FileText, 
   ShieldCheck, 
-  ArrowRight, 
-  TrendingUp, 
-  HeartPulse 
+  ArrowRight
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -66,29 +64,31 @@ export default function Dashboard() {
               Here is your daily health intelligence summary. Manage consultations, track medications, and keep tabs on wellness goals.
             </p>
           </div>
-          {/* Health Score Pill Banner */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/15 p-4 rounded-2xl flex items-center gap-4 min-w-[220px]">
-            <div className="p-3 bg-brand-500/30 rounded-xl text-brand-200">
-              <HeartPulse className="w-8 h-8 animate-pulse" />
+          {/* EHR Vault Quick Access Pill */}
+          <button
+            onClick={() => navigate("/patient/records")}
+            className="bg-white/10 backdrop-blur-md border border-white/15 p-3 rounded-xl flex items-center gap-3 min-w-[180px] hover:bg-white/15 transition-colors text-left"
+          >
+            <div className="p-2 bg-brand-500/30 rounded-lg text-brand-200">
+              <FileText className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-brand-200 uppercase tracking-wider">Health Score</p>
+              <p className="text-[10px] font-semibold text-brand-200 uppercase tracking-wider">EHR Vault</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold">{data?.healthScore ?? "--"}</span>
-                <span className="text-xs text-brand-200">/ 100</span>
+                <span className="text-sm font-extrabold">View Records</span>
               </div>
-              <p className="text-[11px] text-emerald-300 flex items-center gap-1 mt-0.5">
-                <TrendingUp className="w-3 h-3" /> Optimal Range
+              <p className="text-[10px] text-emerald-300 flex items-center gap-1 mt-0.5">
+                <ArrowRight className="w-2.5 h-2.5" /> All medical history
               </p>
             </div>
-          </div>
+          </button>
         </div>
         {/* Decorative Background Circles */}
         <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-white/5 rounded-full blur-2xl pointer-events-none" />
       </div>
 
       {/* Quick Work-Oriented Navigation Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           onClick={() => navigate("/patient/treat-disease")}
           className="flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-brand-100/80 shadow-xs hover:border-brand-300 hover:shadow-md transition-all group text-left"
@@ -123,18 +123,6 @@ export default function Dashboard() {
           <div>
             <p className="text-xs text-slate-500 font-medium">Log Daily</p>
             <p className="text-xs sm:text-sm font-semibold text-slate-800">Water & Vitals</p>
-          </div>
-        </button>
-        <button
-          onClick={() => navigate("/patient/records")}
-          className="flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-brand-100/80 shadow-xs hover:border-brand-300 hover:shadow-md transition-all group text-left"
-        >
-          <div className="p-2.5 bg-accent-50 rounded-xl text-accent-500 group-hover:bg-accent-500 group-hover:text-white transition-colors">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">EHR Vault</p>
-            <p className="text-xs sm:text-sm font-semibold text-slate-800">View Records</p>
           </div>
         </button>
       </div>
