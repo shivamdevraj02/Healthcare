@@ -52,14 +52,15 @@ exports.register = async (req, res) => {
 // POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const { password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    if (!user.isActive) {
+    if (user.isActive === false) {
       return res.status(403).json({ message: "Your account is inactive. Please contact support." });
     }
 
