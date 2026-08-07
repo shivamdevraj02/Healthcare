@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
     age: { type: Number },
     gender: { type: String, enum: ["male", "female", "other"], default: "other" },
     avatar: { type: String, default: "" },
-    
+
     // Doctor-specific fields
     specialization: { type: String, default: "" },
     qualification: { type: String, default: "" },
@@ -23,27 +23,26 @@ const userSchema = new mongoose.Schema(
         slots: [{ type: String }],
       },
     ],
-    
+
     // Patient-specific quick fields
     bloodGroup: { type: String, default: "" },
     healthScore: { type: Number, default: 70 },
     isActive: { type: Boolean, default: true },
-    
+
     // NEW: Handles the Doctor Approval Workflow
-    approvalStatus: { 
-      type: String, 
-      enum: ["pending", "approved", "rejected"], 
-      default: "approved" 
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved"
     },
   },
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 userSchema.methods.matchPassword = async function (entered) {
