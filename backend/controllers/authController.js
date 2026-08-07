@@ -9,9 +9,10 @@ const genToken = (id) => {
 };
 
 // POST /api/auth/register
+// POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, phone, specialization, qualification } = req.body;
+    const { name, email, password, role, phone, specialization, qualification, age, gender } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email and password are required" });
@@ -28,9 +29,11 @@ exports.register = async (req, res) => {
       email,
       password,
       role: assignedRole,
-      phone,
-      specialization,
-      qualification,
+      phone: phone || "",
+      age: age || null,
+      gender: gender || "other",
+      specialization: specialization || "",
+      qualification: qualification || "",
       approvalStatus,
     });
 
@@ -44,14 +47,12 @@ exports.register = async (req, res) => {
           "info"
         );
       }
-
       await createNotification(
         user._id,
         "Pending approval",
         "Your doctor account is pending admin approval. You will be able to sign in once approved.",
         "info"
       );
-
       return res.status(201).json({
         user: { id: user._id, name: user.name, email: user.email, role: user.role },
         message: "Doctor account created. Please wait for admin approval before logging in.",
@@ -59,13 +60,13 @@ exports.register = async (req, res) => {
     }
 
     const token = genToken(user._id);
-
-    res.status(201).json({
+    return res.status(201).json({
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Registration Error:", err);
+    return res.status(500).json({ message: err.message || "Registration failed" });
   }
 };
 
