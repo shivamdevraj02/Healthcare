@@ -19,11 +19,10 @@ export default function TreatDisease() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-              tab === t
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${tab === t
                 ? "bg-brand-600 text-white shadow-2xs"
                 : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-            }`}
+              }`}
           >
             {t}
           </button>
@@ -44,7 +43,7 @@ function BookAppointment() {
   const [availableSlotsForSelectedDate, setAvailableSlotsForSelectedDate] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [dateError, setDateError] = useState("");
-  const [form, setForm] = useState({ doctor: "", date: "", time: "", type: "video", reason: "" });
+  const [form, setForm] = useState({ doctor: "", date: "", time: "", type: "video", reason: "", address: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -108,21 +107,22 @@ function BookAppointment() {
     const dateObj = new Date(selectedDateStr);
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dayName = dayNames[dateObj.getDay()];
+    const normalizeDay = (value) => String(value || "").trim().toLowerCase();
     const daySchedule = selectedDoctor.availability?.find(
-      (a) => a.day?.toLowerCase() === dayName.toLowerCase()
+      (a) => normalizeDay(a.day) === normalizeDay(dayName)
     );
 
-    if (daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
+    if (daySchedule && Array.isArray(daySchedule.slots) && daySchedule.slots.length > 0) {
       setAvailableSlotsForSelectedDate(daySchedule.slots);
     } else {
       setAvailableSlotsForSelectedDate([]);
-      setDateError(`Dr. ${selectedDoctor.name} is Off-Duty on ${dayName}s.`);
+      setDateError(`Dr. ${selectedDoctor.name} is Off-Duty on ${dayName}s. Please select another date.`);
     }
   };
 
   const book = async (e) => {
     e.preventDefault();
-    if (!form.doctor || !form.date || !form.time || dateError) return;
+    if (!form.doctor || !form.date || !form.time || !form.address || dateError) return;
     setLoading(true);
     try {
       const res = await api.post("/appointments", form);
@@ -137,7 +137,7 @@ function BookAppointment() {
         setAppointments((prev) => [populatedAppointment, ...prev]);
       }
 
-      setForm({ doctor: "", date: "", time: "", type: "video", reason: "" });
+      setForm({ doctor: "", date: "", time: "", type: "video", reason: "", address: "" });
       setSelectedDoctor(null);
       setAvailableSlotsForSelectedDate([]);
       setDateError("");
@@ -224,8 +224,8 @@ function BookAppointment() {
                     !form.date
                       ? "Select Date First"
                       : dateError
-                      ? "Doctor Off-Duty"
-                      : "No Slots Available"
+                        ? "Doctor Off-Duty"
+                        : "No Slots Available"
                   }
                   className="input text-xs bg-slate-100 text-slate-400 cursor-not-allowed"
                 />
@@ -261,6 +261,17 @@ function BookAppointment() {
             />
           </div>
 
+          <div>
+            <label className="text-xs font-semibold text-slate-700 mb-1 block">Village / Location</label>
+            <input
+              required
+              className="input text-xs"
+              placeholder="Enter your village or pincode"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+          </div>
+
           <button
             type="submit"
             className="btn-primary w-full text-xs font-bold py-2.5 disabled:opacity-50"
@@ -282,13 +293,12 @@ function BookAppointment() {
                   Dr. {typeof a.doctor === "object" ? a.doctor?.name : selectedDoctor?.name || "Doctor"}
                 </span>
                 <span
-                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize border ${
-                    a.status === "confirmed"
+                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize border ${a.status === "confirmed"
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                       : a.status === "pending"
-                      ? "bg-amber-50 text-amber-700 border-amber-200"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
-                  }`}
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
                 >
                   {a.status}
                 </span>

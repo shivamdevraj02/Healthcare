@@ -30,7 +30,7 @@ const PRESET_SHIFTS = [
 ];
 
 export default function Availability() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // Initialize Availability State
   const [schedule, setSchedule] = useState(() => {
@@ -104,7 +104,8 @@ export default function Availability() {
           slots: a.slots,
         }));
 
-      await api.put("/doctor/availability", { availability: payload });
+      const res = await api.put("/doctor/availability", { availability: payload });
+      updateUser({ ...user, availability: res.data.availability || payload });
       setMsg("Schedule updated successfully!");
       setTimeout(() => setMsg(""), 3000);
     } catch (err) {

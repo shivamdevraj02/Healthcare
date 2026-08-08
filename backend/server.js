@@ -78,7 +78,29 @@ app.use((err, req, res, next) => {
 
 console.log(process.env.MONGO_URI);
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(`SwasthSetu backend with WebSockets running on port ${PORT}`)
-);
+const PORT = Number(process.env.PORT || 5002);
+
+const startServer = (portToTry, attempts = 0) => {
+  server.once("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      const nextPort = portToTry + 1;
+      if (attempts < 10) {
+        console.warn(`Port ${portToTry} is busy. Retrying on ${nextPort}...`);
+        startServer(nextPort, attempts + 1);
+        return;
+      }
+
+      console.error(`No free port found after trying ${portToTry}.`);
+      process.exit(1);
+    } else {
+      console.error("Server error:", error);
+      process.exit(1);
+    }
+  });
+
+  server.listen(portToTry, () => {
+    console.log(`SwasthSetu backend with WebSockets running on port ${portToTry}`);
+  });
+};
+
+startServer(PORT);

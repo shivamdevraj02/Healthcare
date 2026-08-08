@@ -40,8 +40,40 @@ const userSchema = new mongoose.Schema(
       enum: ["patient", "doctor", "admin"],
       default: "patient",
     },
+    specialization: {
+      type: String,
+      default: "",
+    },
+    qualification: {
+      type: String,
+      default: "",
+    },
+    experienceYears: {
+      type: Number,
+      default: 0,
+    },
+    avatar: {
+      type: String,
+      default: "",
+    },
     isActive: { type: Boolean, default: true },
     approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
+    availability: {
+      type: [
+        {
+          day: {
+            type: String,
+            enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            required: true,
+          },
+          slots: {
+            type: [String],
+            default: [],
+          },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

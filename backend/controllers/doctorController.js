@@ -156,11 +156,23 @@ exports.getPrescriptions = async (req, res) => {
 // PUT /api/doctor/availability
 exports.updateAvailability = async (req, res) => {
   try {
+    const incoming = Array.isArray(req.body.availability) ? req.body.availability : [];
+    const normalized = incoming
+      .filter((item) => item && item.day)
+      .map((item) => ({
+        day: String(item.day).trim(),
+        slots: Array.isArray(item.slots)
+          ? [...new Set(item.slots.map((slot) => String(slot).trim()).filter(Boolean))]
+          : [],
+      }))
+      .filter((item) => item.slots.length > 0);
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { availability: req.body.availability },
+      { availability: normalized },
       { new: true }
     ).select("-password");
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });

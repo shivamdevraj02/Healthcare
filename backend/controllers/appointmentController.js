@@ -6,11 +6,12 @@ const User = require("../models/User");
 exports.bookAppointment = async (req, res) => {
   try {
     const { doctor, date, time, type, reason } = req.body;
+    const address = (req.body.address || "").trim();
 
-    if (!doctor || !date || !time) {
+    if (!doctor || !date || !time || !address) {
       return res
         .status(400)
-        .json({ message: "doctor, date and time are required" });
+        .json({ message: "doctor, date, time and address are required" });
     }
 
     // 1. Create Appointment Record
@@ -21,6 +22,7 @@ exports.bookAppointment = async (req, res) => {
       time,
       type: type || "video",
       reason: reason || "",
+      address,
     });
 
     // Populate patient details taaki doctor side UI me name, age, phone instant render ho sake
@@ -29,7 +31,6 @@ exports.bookAppointment = async (req, res) => {
     // 2. Safely Trigger Notification & Socket Emit for Doctor
     try {
       if (doctor) {
-        // Database notification create karein
         const newNotif = await Notification.create({
           user: doctor,
           title: "New Appointment Request",
@@ -37,22 +38,51 @@ exports.bookAppointment = async (req, res) => {
           type: "appointment",
         });
 
-        // Socket Instance retrieve karein (server.js me app.set("io", io) zaroori hai)
+        const doctorData = await User.findById(doctor).select("email name");
+        if (doctorData?.email) {
+          const { sendEmail } = require("../utils/emailService");
+          await sendEmail(
+            doctorData.email,
+            "New Appointment Request - SwasthSetu",
+            `You have a new appointment request from ${req.user.name || "a patient"} on ${new Date(date).toLocaleDateString()} at ${time}.`
+          );
+        }
+
         const io = req.app.get("io");
         if (io) {
-          // A) Doctor ko live New Appointment Request ka data bhejen
           io.to(doctor.toString()).emit("appointment_updated", {
             type: "NEW_APPOINTMENT",
             appointment,
           });
 
-          // B) Doctor ke Topbar par live Notification pop karayein
           io.to(doctor.toString()).emit("new_notification", newNotif);
         }
       }
     } catch (notifErr) {
       console.error("Non-blocking Notification/Socket Error:", notifErr.message);
-      // Main appointment creation will still succeed even if notification/socket fails
+    }
+
+   // 3. Camp Detection Logic
+    // Use the sanitized 'address' variable and make the search case-insensitive
+    const patientDensity = await Appointment.countDocuments({
+      doctor: doctor,
+      address: { $regex: new RegExp(`^${address}$`, "i") },
+      status: { $in: ["pending", "confirmed"] },
+    });
+
+    // 4. Trigger Camp Alert if threshold is met
+
+    if (patientDensity >= 2 && address) {
+      const { createNotification } = require("../utils/notificationHelper");
+      const { sendEmail } = require("../utils/emailService");
+      const docData = await User.findById(doctor);
+      const campMessage = `Medical Camp Alert: You have ${patientDensity} patients requesting consultations from the same location (${address}). Consider setting up a medical camp in this area.`;
+
+      await createNotification(doctor, "Medical Camp Recommendation", campMessage, "info");
+
+      if (docData && docData.email) {
+        await sendEmail(docData.email, "Medical Camp Recommendation - SwasthSetu", campMessage);
+      }
     }
 
     return res.status(201).json(appointment);
