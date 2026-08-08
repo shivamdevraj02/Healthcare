@@ -315,6 +315,7 @@ VITE_ZEGO_SERVER_SECRET=YOUR_SERVER_SECRET
 - Mobile Application
 - Wearable Device Integration
 - Multi-language Support
+- Medical Camp Feature
 
 ---
 
