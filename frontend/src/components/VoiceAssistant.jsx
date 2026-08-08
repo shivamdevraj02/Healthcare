@@ -243,7 +243,7 @@ export default function VoiceAssistant() {
                 onClick={() => setShowVoicePicker((v) => !v)}
                 className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 text-white/90 hover:bg-white/15 transition-flex items-center justify-center flex"
               >
-                <img src={languageIcon} alt="Language" className="w-5 h-5" />
+                <img src={languageIcon} alt="Language" className="w-5 h-7" />
               </button>
               <button
                 title={voiceReplyEnabled ? "Voice replies on" : "Voice replies off"}
