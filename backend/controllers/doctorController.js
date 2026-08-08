@@ -206,8 +206,11 @@ exports.updateProfile = async (req, res) => {
 // GET /api/patient/doctors (Patients list view for doctors)
 exports.listDoctors = async (req, res) => {
   try {
-    const doctors = await User.find({ role: "doctor" })
-      .select("name specialization qualification experienceYears availability email phone")
+    // Cache-Control headers ensure browser/client latest data mangta hai
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    
+    const doctors = await User.find({ role: "doctor", approvalStatus: "approved" })
+      .select("name specialization qualification experienceYears availability email phone consultationFee") // 'consultationFee' include karna zaroori hai
       .sort({ name: 1 });
     res.status(200).json(doctors);
   } catch (err) {

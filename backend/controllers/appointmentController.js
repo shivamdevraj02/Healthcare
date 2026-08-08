@@ -3,18 +3,22 @@ const Notification = require("../models/Notification");
 const User = require("../models/User");
 
 // POST /api/appointments (Patient books an appointment)
+// POST /api/appointments (Patient books an appointment)
 exports.bookAppointment = async (req, res) => {
   try {
-    const { doctor, date, time, type, reason } = req.body;
-    const address = (req.body.address || "").trim();
-
-    if (!doctor || !date || !time || !address) {
+    const { doctor, date, time, type, reason, fee } = req.body;
+    if (!doctor || !date || !time) {
       return res
         .status(400)
-        .json({ message: "doctor, date, time and address are required" });
+        .json({ message: "doctor, date and time are required" });
     }
 
-    // 1. Create Appointment Record
+    // 1. Calculate 3-way split or use provided fee
+    const consultationFee = fee || 500;
+    const adminCommission = Math.round(consultationFee * 0.05 * 100) / 100; // 5% Admin cut
+    const doctorEarnings = consultationFee - adminCommission;
+
+    // 2. Create Appointment Record with Financial fields
     const appointment = await Appointment.create({
       patient: req.user._id,
       doctor,
@@ -22,13 +26,16 @@ exports.bookAppointment = async (req, res) => {
       time,
       type: type || "video",
       reason: reason || "",
-      address,
+      fee: consultationFee,
+      adminCommission,
+      doctorEarnings,
+      paymentStatus: "pending",
     });
 
-    // Populate patient details taaki doctor side UI me name, age, phone instant render ho sake
-    await appointment.populate("patient doctor", "name email phone age gender");
+    // Populate patient & doctor details
+    await appointment.populate("patient doctor", "name email phone age gender specialization");
 
-    // 2. Safely Trigger Notification & Socket Emit for Doctor
+    // 3. Trigger Notification & Socket Emit for Doctor
     try {
       if (doctor) {
         const newNotif = await Notification.create({
@@ -38,51 +45,17 @@ exports.bookAppointment = async (req, res) => {
           type: "appointment",
         });
 
-        const doctorData = await User.findById(doctor).select("email name");
-        if (doctorData?.email) {
-          const { sendEmail } = require("../utils/emailService");
-          await sendEmail(
-            doctorData.email,
-            "New Appointment Request - SwasthSetu",
-            `You have a new appointment request from ${req.user.name || "a patient"} on ${new Date(date).toLocaleDateString()} at ${time}.`
-          );
-        }
-
         const io = req.app.get("io");
         if (io) {
           io.to(doctor.toString()).emit("appointment_updated", {
             type: "NEW_APPOINTMENT",
             appointment,
           });
-
           io.to(doctor.toString()).emit("new_notification", newNotif);
         }
       }
     } catch (notifErr) {
       console.error("Non-blocking Notification/Socket Error:", notifErr.message);
-    }
-
-   // 3. Camp Detection Logic
-    // Use the sanitized 'address' variable and make the search case-insensitive
-    const patientDensity = await Appointment.countDocuments({
-      doctor: doctor,
-      address: { $regex: new RegExp(`^${address}$`, "i") },
-      status: { $in: ["pending", "confirmed"] },
-    });
-
-    // 4. Trigger Camp Alert if threshold is met
-
-    if (patientDensity >= 2 && address) {
-      const { createNotification } = require("../utils/notificationHelper");
-      const { sendEmail } = require("../utils/emailService");
-      const docData = await User.findById(doctor);
-      const campMessage = `Medical Camp Alert: You have ${patientDensity} patients requesting consultations from the same location (${address}). Consider setting up a medical camp in this area.`;
-
-      await createNotification(doctor, "Medical Camp Recommendation", campMessage, "info");
-
-      if (docData && docData.email) {
-        await sendEmail(docData.email, "Medical Camp Recommendation - SwasthSetu", campMessage);
-      }
     }
 
     return res.status(201).json(appointment);
