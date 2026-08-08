@@ -344,7 +344,7 @@ export default function VoiceAssistant() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="relative w-18 h-18 min-w-[4.5rem] min-h-[4.5rem] rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-[0_24px_80px_rgba(15,86,105,0.25)] flex items-center justify-center transition-transform hover:scale-105"
+          className="relative w-18 h-18 min-w-[4.5rem] min-h-[4.5rem] rounded-full bg-brand-50 hover:bg-brand-100 text-brand-700 shadow-[0_24px_80px_rgba(15,86,105,0.12)] flex items-center justify-center transition-transform hover:scale-105"
           aria-label="Open voice assistant"
         >
           <img src={chatbotIcon} alt="Open chat" className="w-10 h-10" />

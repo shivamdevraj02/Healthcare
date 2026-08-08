@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
-import { 
-  Clock, 
-  Calendar, 
-  Plus, 
-  X, 
-  CheckCircle2, 
+import {
+  Clock,
+  Calendar,
+  Plus,
+  X,
+  CheckCircle2,
   Sparkles,
   Save,
   Check
@@ -30,7 +30,7 @@ const PRESET_SHIFTS = [
 ];
 
 export default function Availability() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // Initialize Availability State
   const [schedule, setSchedule] = useState(() => {
@@ -48,6 +48,20 @@ export default function Availability() {
 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    const updatedSchedule = DAYS.map((day) => {
+      const existing = user?.availability?.find((a) => a.day?.toLowerCase() === day.toLowerCase());
+      const slotsArray = existing?.slots || [];
+      return {
+        day,
+        active: slotsArray.length > 0,
+        slots: slotsArray,
+        customInput: "",
+      };
+    });
+    setSchedule(updatedSchedule);
+  }, [user]);
 
   // Toggle Day Active / Inactive
   const toggleDay = (index) => {
@@ -104,7 +118,20 @@ export default function Availability() {
           slots: a.slots,
         }));
 
-      await api.put("/doctor/availability", { availability: payload });
+      const res = await api.put("/doctor/availability", { availability: payload });
+      const updatedAvailability = res.data?.availability || payload;
+      updateUser({ ...user, availability: updatedAvailability });
+      setSchedule((prev) =>
+        DAYS.map((day) => {
+          const existing = updatedAvailability.find((a) => a.day?.toLowerCase() === day.toLowerCase());
+          return {
+            day,
+            active: Boolean(existing?.slots?.length),
+            slots: existing?.slots || [],
+            customInput: "",
+          };
+        })
+      );
       setMsg("Schedule updated successfully!");
       setTimeout(() => setMsg(""), 3000);
     } catch (err) {
@@ -175,11 +202,10 @@ export default function Availability() {
         {schedule.map((dayData, dayIndex) => (
           <div
             key={dayData.day}
-            className={`p-5 rounded-2xl border transition-all ${
-              dayData.active
-                ? "bg-white border-slate-200/90 shadow-2xs"
-                : "bg-slate-50/70 border-slate-200/50 opacity-75"
-            }`}
+            className={`p-5 rounded-2xl border transition-all ${dayData.active
+              ? "bg-white border-slate-200/90 shadow-2xs"
+              : "bg-slate-50/70 border-slate-200/50 opacity-75"
+              }`}
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               {/* Day Toggle Header */}
@@ -188,23 +214,20 @@ export default function Availability() {
                 <button
                   type="button"
                   onClick={() => toggleDay(dayIndex)}
-                  className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                    dayData.active ? "bg-brand-600" : "bg-slate-300"
-                  }`}
+                  className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${dayData.active ? "bg-brand-600" : "bg-slate-300"
+                    }`}
                 >
                   <div
-                    className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                      dayData.active ? "translate-x-5" : "translate-x-0"
-                    }`}
+                    className={`w-4 h-4 rounded-full bg-white transition-transform ${dayData.active ? "translate-x-5" : "translate-x-0"
+                      }`}
                   />
                 </button>
 
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">{dayData.day}</h3>
                   <span
-                    className={`text-[10px] font-semibold uppercase tracking-wider ${
-                      dayData.active ? "text-emerald-600" : "text-slate-400"
-                    }`}
+                    className={`text-[10px] font-semibold uppercase tracking-wider ${dayData.active ? "text-emerald-600" : "text-slate-400"
+                      }`}
                   >
                     {dayData.active ? "Available" : "Off Duty"}
                   </span>

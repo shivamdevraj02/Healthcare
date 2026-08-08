@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import Card from "../../components/Card";
-import { CheckCircle2, Clock3, Trash2, UserCircle, Stethoscope } from "lucide-react";
+import { CheckCircle2, Clock3, Trash2, UserCircle, Save, IndianRupee } from "lucide-react";
 
 export default function Doctors() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [feeInputs, setFeeInputs] = useState({});
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await api.get("/admin/doctors");
       setItems(res.data);
+      // Initialize fee inputs state
+      const feesMap = {};
+      res.data.forEach((d) => {
+        feesMap[d._id] = d.consultationFee || 500;
+      });
+      setFeeInputs(feesMap);
     } finally {
       setLoading(false);
     }
@@ -31,6 +38,22 @@ export default function Doctors() {
     load();
   };
 
+  const updateFee = async (doctorId) => {
+    const newFee = Number(feeInputs[doctorId]);
+    if (isNaN(newFee) || newFee < 0) {
+      alert("Please enter a valid fee amount.");
+      return;
+    }
+    try {
+      await api.put(`/admin/users/${doctorId}`, { consultationFee: newFee });
+      alert("Consultation fee updated successfully!");
+      load();
+    } catch (err) {
+      console.error("Failed to update fee:", err);
+      alert("Failed to update fee.");
+    }
+  };
+
   const remove = async (id) => {
     if (!window.confirm("Are you sure you want to permanently delete this doctor account?")) return;
     await api.delete(`/admin/users/${id}`);
@@ -42,9 +65,9 @@ export default function Doctors() {
       <div className="rounded-3xl border border-brand-100 bg-gradient-to-r from-brand-600 to-accent-500 p-6 text-white shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-brand-50 text-sm uppercase tracking-[0.3em]">Doctor Review</p>
-            <h2 className="text-2xl font-bold">Manage doctor access</h2>
-            <p className="text-sm text-brand-50/90 mt-1">Approve new doctors, review pending requests, and remove accounts when needed.</p>
+            <p className="text-brand-50 text-sm uppercase tracking-[0.3em]">Doctor Review & Pricing</p>
+            <h2 className="text-2xl font-bold">Manage Doctor Access & Consultation Fees</h2>
+            <p className="text-sm text-brand-50/90 mt-1">Approve new doctors, review pending requests, and manage standard consultation fees.</p>
           </div>
           <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
             <p className="text-xs uppercase tracking-[0.3em] text-brand-100">Pending review</p>
@@ -60,7 +83,7 @@ export default function Doctors() {
               <tr>
                 <th className="px-6 py-4">Doctor</th>
                 <th className="px-6 py-4">Specialization</th>
-                <th className="px-6 py-4">Experience</th>
+                <th className="px-6 py-4">Consultation Fee</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -69,7 +92,6 @@ export default function Doctors() {
               {items.map((d) => {
                 const isApproved = d.approvalStatus === "approved";
                 const isPending = d.approvalStatus === "pending";
-
                 return (
                   <tr key={d._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
@@ -84,7 +106,29 @@ export default function Doctors() {
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-700">{d.specialization || "General"}</td>
-                    <td className="px-6 py-4 text-slate-600">{d.experienceYears || 0} Years</td>
+                    
+                    {/* Admin Fee Editor Input */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="relative w-28">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                          <input
+                            type="number"
+                            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl pl-6 pr-2 py-1.5 outline-none focus:ring-2 focus:ring-brand-500"
+                            value={feeInputs[d._id] !== undefined ? feeInputs[d._id] : (d.consultationFee || 500)}
+                            onChange={(e) => setFeeInputs({ ...feeInputs, [d._id]: e.target.value })}
+                          />
+                        </div>
+                        <button
+                          onClick={() => updateFee(d._id)}
+                          className="p-1.5 bg-brand-50 text-brand-700 hover:bg-brand-600 hover:text-white rounded-xl transition-colors border border-brand-200"
+                          title="Save Fee"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${

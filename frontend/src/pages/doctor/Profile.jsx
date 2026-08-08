@@ -11,6 +11,7 @@ export default function Profile() {
     specialization: user?.specialization || "",
     qualification: user?.qualification || "",
     experienceYears: user?.experienceYears || 0,
+    consultationFee: user?.consultationFee || 500,
   });
   const [msg, setMsg] = useState("");
 
@@ -45,6 +46,10 @@ export default function Profile() {
           <div>
             <label className="text-sm text-slate-600">Years of experience</label>
             <input type="number" className="input mt-1" value={form.experienceYears} onChange={(e) => setForm({ ...form, experienceYears: e.target.value })} />
+          </div>
+          <div>
+            <label className="text-sm text-slate-600">Consultation Fee (₹)</label>
+            <input type="number" className="input mt-1" value={form.consultationFee} onChange={(e) => setForm({ ...form, consultationFee: e.target.value })} placeholder="Enter your fee" />
           </div>
           <button className="btn-primary">Save Changes</button>
           {msg && <p className="text-brand-600 text-sm">{msg}</p>}

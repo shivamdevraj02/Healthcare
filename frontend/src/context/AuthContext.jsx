@@ -8,10 +8,10 @@ export function AuthProvider({ children }) {
     const stored = localStorage.getItem("ss_user");
     return stored ? JSON.parse(stored) : null;
   });
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => localStorage.getItem("ss_token"));
+  const [loading, setLoading] = useState(Boolean(localStorage.getItem("ss_token")));
 
   useEffect(() => {
-    const token = localStorage.getItem("ss_token");
     if (!token) {
       setLoading(false);
       return;
@@ -30,12 +30,13 @@ export function AuthProvider({ children }) {
         setUser(null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
     localStorage.setItem("ss_token", res.data.token);
     localStorage.setItem("ss_user", JSON.stringify(res.data.user));
+    setToken(res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
@@ -45,15 +46,25 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
+  const updateUser = (nextUser) => {
+    setUser(nextUser);
+    if (nextUser) {
+      localStorage.setItem("ss_user", JSON.stringify(nextUser));
+    } else {
+      localStorage.removeItem("ss_user");
+    }
+  };
+
   const logout = (callback) => {
     localStorage.removeItem("ss_token");
     localStorage.removeItem("ss_user");
+    setToken(null);
     setUser(null);
     if (callback) callback();
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

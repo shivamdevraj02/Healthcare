@@ -14,13 +14,19 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// =========================
 // Allowed Origins
+// =========================
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://healthcare-ashy-nu.vercel.app",
 ];
 
-// Socket.io
+// =========================
+// Socket.IO
+// =========================
+
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -29,15 +35,14 @@ const io = new Server(server, {
   },
 });
 
+global.io = io;
 app.set("io", io);
 
 io.on("connection", (socket) => {
   console.log("Socket Connected:", socket.id);
 
   socket.on("joinUserRoom", (userId) => {
-    if (userId) {
-      socket.join(userId.toString());
-    }
+    if (userId) socket.join(userId.toString());
   });
 
   socket.on("disconnect", () => {
@@ -45,11 +50,13 @@ io.on("connection", (socket) => {
   });
 });
 
-// CORS
+// =========================
+// Middlewares
+// =========================
+
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Postman ya server-to-server requests
+    origin(origin, callback) {
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -62,22 +69,21 @@ app.use(
   })
 );
 
-// No Cache
+app.use(express.json());
+app.use(cookieParser());
+app.use(morgan("dev"));
+
 app.use((req, res, next) => {
-  res.set(
-    "Cache-Control",
-    "no-store, no-cache, must-revalidate, proxy-revalidate"
-  );
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
   next();
 });
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(morgan("dev"));
-
+// =========================
 // Health Check
+// =========================
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -85,7 +91,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// =========================
 // Routes
+// =========================
+
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/patient", require("./routes/patientRoutes"));
 app.use("/api/doctor", require("./routes/doctorRoutes"));
@@ -94,21 +103,34 @@ app.use("/api/appointments", require("./routes/appointmentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/chatbot", require("./routes/chatbotRoutes"));
 
+// Razorpay
+app.use("/api/payments", require("./routes/paymentRoutes"));
+
+// =========================
 // 404
+// =========================
+
 app.use((req, res) => {
   res.status(404).json({
     message: "Route not found",
   });
 });
 
+// =========================
 // Error Handler
+// =========================
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(err);
 
   res.status(err.status || 500).json({
     message: err.message || "Server Error",
   });
 });
+
+// =========================
+// Start Server
+// =========================
 
 const PORT = process.env.PORT || 5000;
 
