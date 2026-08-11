@@ -1,4 +1,4 @@
-# 🏥 SwasthSetu - Smart Healthcare Platform
+
 
 <p align="center">
   <img src="./frontend/public/icon.png" width="150" alt="SwasthSetu Logo"/>
