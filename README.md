@@ -28,8 +28,8 @@ SwasthSetu is an AI-powered Healthcare Management Platform that connects Patient
 
 The system provides:
 
-- 🩺 Online Doctor Consultation
-- 🎥 Video Consultation
+-  Online Doctor Consultation
+-  Video Consultation
 - 🤖 AI Healthcare Chatbot
 - 💊 Medicine Reminder
 - 📅 Appointment Booking
