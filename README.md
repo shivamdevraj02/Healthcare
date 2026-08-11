@@ -30,12 +30,12 @@ The system provides:
 
 -  Online Doctor Consultation
 -  Video Consultation
-- 🤖 AI Healthcare Chatbot
-- 💊 Medicine Reminder
-- 📅 Appointment Booking
-- 📄 Digital Prescription
-- ❤️ Health Record Management
-- 🔔 Real-Time Notifications
+-  AI Healthcare Chatbot
+-  Medicine Reminder
+-  Appointment Booking
+-  Digital Prescription
+-  Health Record Management
+-  Real-Time Notifications
 
 ---
 
