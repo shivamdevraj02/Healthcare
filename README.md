@@ -57,7 +57,7 @@ The system provides:
 
 ---
 
-## 👨‍⚕️ Doctor
+##  Doctor
 
 - Doctor Registration
 - Admin Approval
