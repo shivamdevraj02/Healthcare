@@ -362,6 +362,6 @@ It motivates us to build more amazing projects.
 
 <p align="center">
 
-Made with ❤️ using React, Node.js, MongoDB & AI
+with ❤️ using React, Node.js, MongoDB & AI
 
 </p>
