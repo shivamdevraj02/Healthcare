@@ -362,6 +362,6 @@ It motivates us to build more amazing projects.
 
 <p align="center">
 
- using React, Node.js, MongoDB & AI
+ , Node.js, MongoDB & AI
 
 </p>
