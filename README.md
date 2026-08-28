@@ -36,6 +36,7 @@ The system provides:
 -  Digital Prescription
 -  Health Record Management
 -  Real-Time Notifications
+-  All in one work facility
 
 ---
 
