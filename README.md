@@ -42,7 +42,7 @@ The system provides:
 
 # ✨ Features
 
-##  Patient
+##  Patient:-
 
 - Register & Login
 - Dashboard
@@ -55,6 +55,7 @@ The system provides:
 - Video Consultation
 - Notifications
 - Profile Management
+- seprate dashboard
 
 ---
 
