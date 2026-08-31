@@ -42,7 +42,7 @@ The system provides:
 
 # ✨ Features
 
-##  Patient:-
+##  Patient
 
 - Register & Login
 - Dashboard
