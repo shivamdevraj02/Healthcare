@@ -296,7 +296,7 @@ VITE_ZEGO_SERVER_SECRET=YOUR_SERVER_SECRET
 
 ---
 
-# 🚀 Deployment
+# 🚀 Deployment:-
 
 ## Backend
 
