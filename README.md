@@ -22,7 +22,7 @@ A Complete Healthcare Management Platform for Patients, Doctors & Administrators
 
 ---
 
-# 📖 Overviews:-
+# 📖 Overview
 
 SwasthSetu is an AI-powered Healthcare Management Platform that connects Patients, Doctors, and Administrators on one secure platform.
 
