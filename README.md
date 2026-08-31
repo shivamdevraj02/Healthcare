@@ -322,7 +322,7 @@ VITE_ZEGO_SERVER_SECRET=YOUR_SERVER_SECRET
 
 ---
 
-# 🤝 Contributing
+# 🤝 Contributing:-
 
 Contributions are welcome!
 
