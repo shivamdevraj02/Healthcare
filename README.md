@@ -68,7 +68,7 @@ The system provides:
 - Appointment Management
 - Prescription Management
 - Video Consultation
-- E prescription
+
 
 ---
 
