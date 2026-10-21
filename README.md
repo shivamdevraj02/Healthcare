@@ -135,7 +135,7 @@ The system provides:
 - Socket.IO
 - Node Cron
 - Nodemailer
-- Google Gemini API
+
 
 ---
 
