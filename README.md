@@ -121,6 +121,7 @@ The system provides:
 - Axios
 - CSS3
 - Socket.IO Client
+- GSAP
 
 ---
 
